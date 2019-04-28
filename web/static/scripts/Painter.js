@@ -9,6 +9,7 @@ function fillField(amountOfCells, className, listener) {
             div.id = cell_id;
             if (listener===true){
                 div.className = "cell cell-hover";
+                div.classList.add(`${className}_cell`);
             }
             e[0].appendChild(div);
         }
@@ -67,6 +68,16 @@ function removeOnClick() {
     }
 }
 
+function setOnClick(className) {
+    console.log('setOnClick');
+    //пройтись по всем ячейкам и добавить 'cell-hover';
+    let cells = document.getElementsByClassName(className);
+    for (let i =0; i<cells.length; i++) {
+        cells[i].classList.add('cell-hover');
+    }
+    console.log(cells);
+}
+
 function getRandomInt(min, max) {
     return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -118,4 +129,8 @@ function killShip(ship) {
 
 function markAround(cell) {
 
+}
+
+function changeH1(string) {
+    document.getElementById('h1').innerText = string;
 }

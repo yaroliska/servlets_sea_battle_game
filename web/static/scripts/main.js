@@ -148,7 +148,7 @@ function isAvailable(i,j){
             btn[0].style.visibility = "visible";
             btn[0].addEventListener( "click" , clickBeginGame);
             myShips =ships;
-            setMyShipStatus();
+            setMyShipCellsStatus();
             testFunction();
         }
         return true;
@@ -272,16 +272,49 @@ function clickOpponentCell(){
     let cell = new Cell(i,j,0); //0- нулевой нейтральный статус, когда мы бьем по пустой ячейке предполагается, что она 0
 
     $.ajax({
-        url: '/localhst:3030',
+        url: '/userHitServlet',
         type: 'post',
         dataType: 'json',
         contentType: 'application/json',
         data: JSON.stringify(cell),
         success: function (data) {
             console.log(data);
-            if(data.cells===undefined){
-                //это либо ячейка либо строка
+            if(analiseData(data)==='cell'){
+
+                if (data.state ===2 ){//мы ранили ячейку
+                    // проверяем у ячеек статус onclick и если его нет добавляем его, чтобы пользователь мог стрелять еще
+                    if (checkOnClickCellsStatus('opponent-playing-field_cell')===false){
+                        setOnClick('opponent-playing-field_cell');
+                    }
+                    //выводим сообщение "вы попали" стреляйте еще
+                    changeH1('Вы попали, стреляйте еще!');
+                }
+                else if (data.state===1) {
+                    //мы не ранили ячейку
+                    //блокируем у ячеек статус onclick
+                    removeOnClick();
+                    //запускаем цикл выстрелов компьютера
+                    let flag = true;
+                    while(flag){
+                        //посылаем get запрос чтобы сервер вернул нам ячейку в которую он будет атаковать
+                        $.ajax({
+                            url: "/userHitServlet",
+                            type: "get", //send it through get method
+                            success: function(response) {
+                            },
+                            error: function(xhr) {
+                            }
+                        });
+                        //запускаем функцию проверки попал он или нет
+                    }
+                }
             }
+            else if (analiseData(data)==='ship'){
+
+            }
+           /* else if (analiseData(data)==='string'){
+               запускаем только если будем присылать строку
+            }*/
 
 
             /*if( пришла ячейка){
@@ -316,6 +349,9 @@ function clickOpponentCell(){
             else{ //пришел корабль
 
             }*/
+        },
+        error:function () {
+            
         }
     });
     //бьет , просит ударить, отвечает на удар
@@ -334,7 +370,7 @@ function clickOpponentCell(){
     killed('my-playing-field', i, j)//убит
     */
 }
-function setMyShipStatus() {
+function setMyShipCellsStatus() {
     console.log('setNullStatus to All Ships');
     for (let ship in myShips){
         for (let cell in myShips[ship].cells){
@@ -379,6 +415,22 @@ function analiseData(data) {
     }
 }
 
+//проверяет есть ли у ячеек (противника или свои) в зависимости от classname класс "cell-hover" отвечающий за событие onclick
+function checkOnClickCellsStatus(className) {
+    console.log('checkOnClickCellsStatus');
+    let cells = document.getElementsByClassName(className);
+    if (hasClass(cells[0],`cell-hover`)){
+        return true;
+    }
+    else return false;
+}
+
+//определяет есть ли класс у элемента
+function hasClass(element, className) {
+    console.log('hasClass');
+    let rx = new RegExp('(?:^| )' + className + '(?: |$)');
+    return rx.test(element.className);
+}
 
 //Массив масивов в армаду
 //var armada = {ships:arm.map((ship)=>{return{cells:ship.map((cell)=>{return{x:cell[0],y:cell[1],state:'untchd'}})}})};
