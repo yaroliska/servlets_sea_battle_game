@@ -458,5 +458,4 @@ function killShip(ship) {
 }
 
 function hurtCell() {
-    
 }
