@@ -146,6 +146,7 @@ function markAround(ship,className) {
         if (checkMarkCells(className,i-1,j)) hitBy(className,i-1,j);
         if (checkMarkCells(className,i-1,j-1)) hitBy(className,i-1,j-1);
     }
+    document.getElementById('h1').innerText = 'Убит!';
 }
 function checkMarkCells(className,im,jm) {
     if(im<0 || jm<0 || im>9 || jm>9)
