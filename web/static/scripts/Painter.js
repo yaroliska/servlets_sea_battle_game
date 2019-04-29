@@ -92,7 +92,6 @@ function hurt(className,i,j) {
 
 //убил
 function killed(className,i,j) {
-    document.getElementById('h1').innerText = 'Убит!';
     const cell_id =`${className}_cell_${i}${j}`;
     let cell = document.getElementById(cell_id);
     cell.classList.add('killed_cell');
@@ -118,13 +117,17 @@ function clearPageFields() {
 }
 
 //если корабль умер закрасить все ячейки умершего корабля (перед этим необходимо закрасить ячейки 3 статусом (убитая))
-function killShip(ship) {
-    for (let cell in ship) {
-        if(cell.state==3){
-            let i = cell.y;
-            let j = cell.x;
+function drawkillShip(ship, className) {
+    document.getElementById('h1').innerText = 'Убит!';
+    for (let cell in ship.cells) {
+        if(ship.cells[cell].state===3){
+            let i = ship.cells[cell].y;
+            let j = ship.cells[cell].x;
+            killed(className, i, j)
+            //убрать my-ship class если требуется
         }
     }
+    //метод окружения корабля ячейками мимо
 }
 
 function markAround(cell) {

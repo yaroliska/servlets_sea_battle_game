@@ -317,10 +317,10 @@ function clickOpponentCell(){
     */
 }
 function setMyShipCellsStatus() {
-    console.log('setNullStatus to All Ships');
+    console.log('function setNullStatus to All Ships');
     for (let ship in myShips){
         for (let cell in myShips[ship].cells){
-            myShips[ship].cells[cell].state = '4';//мой корабль, в него еще не стреляли
+            myShips[ship].cells[cell].state = 4;//мой корабль, в него еще не стреляли
         }
     }
     console.log(myShips);
@@ -378,6 +378,7 @@ function getServerHit(){
         success: function(data){
             //нам прислали ячейку
             //запускаем функцию проверки попал он или нет
+            //(data.y, data.x)
             if (CheckOurSellForHurting(0,0)==='hitby'){
                 //отправляем post запрос с информацией о том, что он попал мимо
                 //помечаем на поле пустую ячейку
@@ -401,7 +402,7 @@ function getServerHit(){
 
 //функция проверки попали по нашим кораблям или нет
 function CheckOurSellForHurting(x,y) {//должно быть hit
-    console.log('CheckOurSellForHurting');
+    console.log('function CheckOurSellForHurting');
     for (let ship in myShips){
         for (let cell in myShips[ship].cells){
             //если среди наших кораблей есть такая ячейка(попали)
@@ -429,7 +430,7 @@ function CheckOurSellForHurting(x,y) {//должно быть hit
 }
 //проверка ранена ячейка в корабле пользователя или убита
 function HurtOrKill(ship) {
-    console.log('HurtOrKill');
+    console.log('function HurtOrKill');
     let length = ship.cells.length;
     for (let cell in ship.cells){
         if (ship.cells[cell].state===2){//если в нашем корабле ячейка ранена, то
@@ -448,14 +449,43 @@ function HurtOrKill(ship) {
 
 //метод который убивает все ячейки у корабля (меняет на статус 3)
 function killShip(ship) { 
-    console.log('killShip');
-    //метод который рисует убитый корабль
+    console.log('function killShip');
+    ship.state=1;
+
     for (let cell in ship.cells){
         ship.cells[cell].state=3;
     }
-    //отправляем корабль ship
-    //getServerHit();
+    //метод который рисует убитый корабль
+    drawkillShip(ship,'my-playing-field');
+
+    if(checkEndOfGame()){
+        console.log('все корабли убиты, конец игры');
+        //все корабли убиты => конец игры
+    }
+    else{
+        console.log('отправляем корабль ship и запускаем заново ожидание');
+        //getServerHit();
+    }
+
 }
 
 function hurtCell() {
+}
+
+function checkEndOfGame() {
+    console.log('function CheckOurSellForHurting');
+    let length = myShips.length;
+    for (let ship in myShips){
+        if (myShips[ship].state===1){
+            length--;
+        }
+    }
+    if (length===0){//осталась только одна живая ячейка
+        console.log('последний корабль убит, конец игры!');
+        return true;
+    }
+    else {
+        console.log('остались еще корабли');
+        return false;
+    }
 }
