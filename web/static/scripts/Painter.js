@@ -94,6 +94,9 @@ function hurt(className,i,j) {
 function killed(className,i,j) {
     const cell_id =`${className}_cell_${i}${j}`;
     let cell = document.getElementById(cell_id);
+    if (cell.classList.contains('hurt_cell')){
+        cell.classList.remove('hurt_cell')
+    }
     cell.classList.add('killed_cell');
 }
 

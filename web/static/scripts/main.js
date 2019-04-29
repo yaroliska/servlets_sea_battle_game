@@ -287,6 +287,7 @@ function clickOpponentCell(){
                 }
                 else if (data.state===1) {
                     //мы не ранили ячейку
+                    changeH1('Вы не попали, теперь стреляет компьютер!');
                     //блокируем у ячеек статус onclick
                     removeOnClick();
                     //запускаем функцию которая обрабатывает стрельбу компьютера
@@ -380,19 +381,13 @@ function getServerHit(){
             //запускаем функцию проверки попал он или нет
             //(data.y, data.x)
             if (CheckOurSellForHurting(0,0)==='hitby'){
-                //отправляем post запрос с информацией о том, что он попал мимо
-                //помечаем на поле пустую ячейку
-                //разблокировка события click на ячейках
-                //вывод сообщения:"Ваша очередь";
+                console.log('Промах');
             }
             else if(CheckOurSellForHurting(0,0)==='hurt'){
-                //сервер ранил
-                //отправляем пост запрос что сервер ранил в ячейку
-                //вызываем опять нашу функцию
-                //подкрашиваем на пользовательском поле горящий корабль
+                console.log('Пользователя ранили');
             }
             else if (CheckOurSellForHurting(0,0)==='kill'){
-                
+                console.log('Корабль пользователя убит');
             }
         },
         error: function(xhr) {
@@ -415,7 +410,6 @@ function CheckOurSellForHurting(x,y) {//должно быть hit
                     return 'kill';
                 }
                 else {
-                    myShips[ship].cells[cell].state = 2;
                     hurtCell( myShips[ship].cells[cell]);
                     console.log('return hurt');
                     return 'hurt';
@@ -423,7 +417,7 @@ function CheckOurSellForHurting(x,y) {//должно быть hit
             }
         }
     }
-    //пометить у себя что компьютер по этой ячейке уже стрелял
+    hitByCell(x,y);
     console.log('return hitby');
     return 'hitby';
 
@@ -446,12 +440,10 @@ function HurtOrKill(ship) {
         return false;
     }
 }
-
-//метод который убивает все ячейки у корабля (меняет на статус 3)
+//метод который реагирует на убийство корабля (убивает все ячейки у корабля (меняет на статус 3) и отправляет post-get запросы)
 function killShip(ship) { 
     console.log('function killShip');
     ship.state=1;
-
     for (let cell in ship.cells){
         ship.cells[cell].state=3;
     }
@@ -460,18 +452,35 @@ function killShip(ship) {
 
     if(checkEndOfGame()){
         console.log('все корабли убиты, конец игры');
+        ship.state=2;
+        $.ajax({
+            url: '/!!!!',
+            type: 'post',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(ship),
+            success: function (data) {
+            }
+        });
         //все корабли убиты => конец игры
     }
     else{
         console.log('отправляем корабль ship и запускаем заново ожидание');
-        //getServerHit();
+        $.ajax({
+            url: '/!!!!',
+            type: 'post',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(ship),
+            success: function (data) {
+                getServerHit();
+            }
+        });
+
     }
 
 }
-
-function hurtCell() {
-}
-
+//метод который проверяет все ли корабли у нас убиты
 function checkEndOfGame() {
     console.log('function CheckOurSellForHurting');
     let length = myShips.length;
@@ -488,4 +497,42 @@ function checkEndOfGame() {
         console.log('остались еще корабли');
         return false;
     }
+}
+//метод который реагирует на ранение ячейки
+function hurtCell(cell) {
+    console.log('function hurtCell');
+    cell.state = 2;
+    //рисуем раненую ячейку
+    hurt('my-playing-field',cell.y,cell.x);
+    //post запрос с этой ячейкой
+    $.ajax({
+        url: '/!!!!',
+        type: 'post',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify(cell),
+        success: function (data) {
+            //запускаем заново get
+            getServerHit();
+        }
+    });
+
+
+}
+function hitByCell(x,y) {
+    console.log('function hitByCell');
+    //рисуем, что мы попали мимо
+    hitBy('my-playing-field',y,x);
+   //отсылаем post запрос компьютеру что компьютер промахнулся
+    let cell = new Cell(y,x,1);
+    $.ajax({
+        url: '/!!!!',
+        type: 'post',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify(cell),
+        success: function (data) {
+        }
+    });
+   //присваиваем onclick полю компьютера
 }
