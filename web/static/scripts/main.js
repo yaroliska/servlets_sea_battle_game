@@ -187,9 +187,6 @@ function collisionWith(matr,i,j){
    return true;
 }*/
 
-function numberFromCellId(id){
-}
-
 function fillCreateShipsMatr(){
     for (let i=0; i<n; i++) {
         //значения в матрице = false, что эквивалентно незакрашенным ячейкам
@@ -226,7 +223,7 @@ shipUnder=(i,j,mtr,unChecked)=>{
     let ship=new Ship();
     for (let k = parseInt(j); (k < 10 && mtr[i][k]); k++){
         unChecked[i][k] = false;
-        ship.cells.push(new Cell([parseInt(i),k]));
+        ship.cells.push(new Cell(parseInt(i),k));
     }
     return ship;
 }
@@ -235,7 +232,7 @@ shipAfter=(i,j,mtr,unChecked)=>{
     let ship=new Ship();
     for (let k = parseInt(i); (k < 10 && mtr[k][j]); k++){
         unChecked[k][j] = false;
-        ship.cells.push(new Cell([k,parseInt(j)]));
+        ship.cells.push(new Cell(k,parseInt(j)));
     }
     return ship;
 }
@@ -270,7 +267,6 @@ function clickOpponentCell(){
     let j=parseInt(this.id[this.id.length-1]);
 
     let cell = new Cell(i,j,0); //0- нулевой нейтральный статус, когда мы бьем по пустой ячейке предполагается, что она 0
-
     $.ajax({
         url: '/userHitServlet',
         type: 'post',
@@ -293,20 +289,8 @@ function clickOpponentCell(){
                     //мы не ранили ячейку
                     //блокируем у ячеек статус onclick
                     removeOnClick();
-                    //запускаем цикл выстрелов компьютера
-                    let flag = true;
-                    while(flag){
-                        //посылаем get запрос чтобы сервер вернул нам ячейку в которую он будет атаковать
-                        $.ajax({
-                            url: "/userHitServlet",
-                            type: "get", //send it through get method
-                            success: function(response) {
-                            },
-                            error: function(xhr) {
-                            }
-                        });
-                        //запускаем функцию проверки попал он или нет
-                    }
+                    //запускаем функцию которая обрабатывает стрельбу компьютера
+                    getServerHit();
                 }
             }
             else if (analiseData(data)==='ship'){
@@ -315,50 +299,12 @@ function clickOpponentCell(){
            /* else if (analiseData(data)==='string'){
                запускаем только если будем присылать строку
             }*/
-
-
-            /*if( пришла ячейка){
-                 if (статус этой ячейки ==2) (ранили) {
-                 //проверяем у ячеек статус onclick и если его нет добавляем его, чтобы пользователь мог стрелять еще
-                 //выводим сообщение "вы попали" стреляйте еще
-                 }
-                 else {
-                     значит статус =1 (мимо)
-                     //блокируем у ячеек статус onclick
-
-                     !!!вот тут должен начинаться цикл, который прерывается, когда сервер промахнулся
-
-                         //посылаем get запрос чтобы сервер вернул нам ячейку в которую он будет атаковать
-                         //запускаем функцию проверки попал он или нет
-
-                            if (сервер попал мимо) {
-                                 //отправляем post запрос с информацией о том, что он попал мимо
-                                 //помечаем на поле пустую ячейку
-                                 //разблокировка события click на ячейках
-                                 //вывод сообщения:"Ваша очередь";
-                            }
-                            else (сервер попал в ячейку){
-                                //отправляем пост запрос что сервер попал в ячейку
-                                //отправляем get запрос за новой ячейкой => не надо слать надо зациклить
-                                //подкрашиваем на пользовательском поле горящий корабль
-                            }
-                     //
-                 }
-
-            }
-            else{ //пришел корабль
-
-            }*/
         },
         error:function () {
             
         }
     });
-    //бьет , просит ударить, отвечает на удар
-    //здесь должен быть метод POST с координатами ячейки
 
-    //в зависимости от ответа должен вызваться один из следующих методов для поля противника
-    //(возможно есть смысл задать эти методы сразу классу ячейки... иначе зачем классы?)
     /*hitBy('opponent-playing-field', i,j); //мимо
     hurt('opponent-plaing-field', i, j ); // ранен
     killed('opponent-playing-field', i, j)//убит
@@ -382,16 +328,7 @@ function setMyShipCellsStatus() {
 
 function testFunction(){
     analiseData(myShips[2]);
-}
-
-function checkCellStatus(cell) { //возвращает статус данной ячейки после удара
-    //проверяем принадлежит ли ячейка нашей армаде (попали ли в нас)
-    {
-        //если да, то проверяем какому кораблю она принадлежит и определяем ранена она или убита
-    }
-    //else{
-    // если не принадлежит, то рисуем "мимо для этой ячейки" и посылаем post
-    // }
+    CheckOurSellForHurting(0,0);
 }
 
 //функция проверки корабль это или ячейка
@@ -432,5 +369,94 @@ function hasClass(element, className) {
     return rx.test(element.className);
 }
 
-//Массив масивов в армаду
-//var armada = {ships:arm.map((ship)=>{return{cells:ship.map((cell)=>{return{x:cell[0],y:cell[1],state:'untchd'}})}})};
+//функция обрабатывающая удары сервера
+function getServerHit(){
+    //посылаем get запрос чтобы сервер вернул нам ячейку в которую он будет атаковать
+    $.ajax({
+        url: "/userHitServlet",
+        type: "get",
+        success: function(data){
+            //нам прислали ячейку
+            //запускаем функцию проверки попал он или нет
+            if (CheckOurSellForHurting(0,0)==='hitby'){
+                //отправляем post запрос с информацией о том, что он попал мимо
+                //помечаем на поле пустую ячейку
+                //разблокировка события click на ячейках
+                //вывод сообщения:"Ваша очередь";
+            }
+            else if(CheckOurSellForHurting(0,0)==='hurt'){
+                //сервер ранил
+                //отправляем пост запрос что сервер ранил в ячейку
+                //вызываем опять нашу функцию
+                //подкрашиваем на пользовательском поле горящий корабль
+            }
+            else if (CheckOurSellForHurting(0,0)==='kill'){
+                
+            }
+        },
+        error: function(xhr) {
+        }
+    });
+}
+
+//функция проверки попали по нашим кораблям или нет
+function CheckOurSellForHurting(x,y) {//должно быть hit
+    console.log('CheckOurSellForHurting');
+    for (let ship in myShips){
+        for (let cell in myShips[ship].cells){
+            //если среди наших кораблей есть такая ячейка(попали)
+            if((myShips[ship].cells[cell].x ===x)&&(myShips[ship].cells[cell].y===y)){ //должно быть hit.x
+                console.log('попали');
+                //проверка убит или ранен
+                if (HurtOrKill(myShips[ship], myShips[ship].cells[cell])){
+                    killShip(myShips[ship]);
+                    console.log('return kill');
+                    return 'kill';
+                }
+                else {
+                    myShips[ship].cells[cell].state = 2;
+                    hurtCell( myShips[ship].cells[cell]);
+                    console.log('return hurt');
+                    return 'hurt';
+                }
+            }
+        }
+    }
+    //пометить у себя что компьютер по этой ячейке уже стрелял
+    console.log('return hitby');
+    return 'hitby';
+
+}
+//проверка ранена ячейка в корабле пользователя или убита
+function HurtOrKill(ship) {
+    console.log('HurtOrKill');
+    let length = ship.cells.length;
+    for (let cell in ship.cells){
+        if (ship.cells[cell].state===2){//если в нашем корабле ячейка ранена, то
+            length--;
+        }
+    }
+    if (length===1){//осталась только одна живая ячейка
+        console.log('осталась только одна живая ячейка, в нее попали и корабль убит');
+        return true;
+    }
+    else {
+        console.log('ячейка ранена');
+        return false;
+    }
+}
+
+//метод который убивает все ячейки у корабля (меняет на статус 3)
+function killShip(ship) { 
+    console.log('killShip');
+    //метод который рисует убитый корабль
+    for (let cell in ship.cells){
+        ship.cells[cell].state=3;
+    }
+    //отправляем корабль ship
+    //getServerHit();
+}
+
+function hurtCell() {
+    
+}
