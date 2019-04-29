@@ -300,7 +300,7 @@ function clickOpponentCell(){
             else if (analiseData(data)==='ship'){
                 //мы убили корабль либо выйграли игру
                 if(data.state===1){
-                    //убили корабль
+                    //убили корабль(у него должны все ячейки быть =3)
                     //закрасить все ячейки корабля убитыми
                     drawkillShip(data,'opponent-playing-field');
                 }

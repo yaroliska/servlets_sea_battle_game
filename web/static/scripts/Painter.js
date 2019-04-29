@@ -133,10 +133,39 @@ function drawkillShip(ship, className) {
     //метод окружения корабля ячейками мимо
 }
 
-function markAround(cell) {
-
+function markAround(ship,className) {
+    for (let cell of ship.cells){
+        let i = cell.y;
+        let j = cell.x;
+        if (checkMarkCells(className,i+1,j)) hitBy(className,i+1,j);
+        if (checkMarkCells(className,i+1,j-1)) hitBy(className,i+1,j-1);
+        if (checkMarkCells(className,i+1,j+1)) hitBy(className,i+1,j+1);
+        if (checkMarkCells(className,i,j-1)) hitBy(className,i,j-1);
+        if (checkMarkCells(className,i,j+1)) hitBy(className,i,j+1);
+        if (checkMarkCells(className,i-1,j+1)) hitBy(className,i-1,j+1);
+        if (checkMarkCells(className,i-1,j)) hitBy(className,i-1,j);
+        if (checkMarkCells(className,i-1,j-1)) hitBy(className,i-1,j-1);
+    }
+}
+function checkMarkCells(className,im,jm) {
+    if(im<0 || jm<0 || im>9 || jm>9)
+        return false;
+    const cell_id =`${className}_cell_${im}${jm}`;
+    let cell = document.getElementById(cell_id);
+    if(cell.classList.contains('killed_cell')){
+        return false;
+    }
+    else{
+        return true;
+    }
 }
 
 function changeH1(string) {
     document.getElementById('h1').innerText = string;
 }
+
+
+
+
+
+
