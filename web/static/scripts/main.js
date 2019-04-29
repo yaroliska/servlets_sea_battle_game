@@ -276,18 +276,21 @@ function clickOpponentCell(){
         success: function (data) {
             console.log(data);
             if(analiseData(data)==='cell'){
-
                 if (data.state ===2 ){//мы ранили ячейку
                     // проверяем у ячеек статус onclick и если его нет добавляем его, чтобы пользователь мог стрелять еще
                     if (checkOnClickCellsStatus('opponent-playing-field_cell')===false){
                         setOnClick('opponent-playing-field_cell');
                     }
+                    //подсветить ячейку как раненую
+                    hurt('opponent-playing-field',data.y,data.x);
                     //выводим сообщение "вы попали" стреляйте еще
                     changeH1('Вы попали, стреляйте еще!');
                 }
                 else if (data.state===1) {
                     //мы не ранили ячейку
                     changeH1('Вы не попали, теперь стреляет компьютер!');
+                    //подветить как "мимо"
+                    hitBy('opponent-playing-field', data.y,data.x);
                     //блокируем у ячеек статус onclick
                     removeOnClick();
                     //запускаем функцию которая обрабатывает стрельбу компьютера
@@ -295,7 +298,17 @@ function clickOpponentCell(){
                 }
             }
             else if (analiseData(data)==='ship'){
-
+                //мы убили корабль либо выйграли игру
+                if(data.state===1){
+                    //убили корабль
+                    //закрасить все ячейки корабля убитыми
+                    drawkillShip(data,'opponent-playing-field');
+                }
+                else if(data.state===2){
+                    //конец игры
+                    drawkillShip(data,'opponent-playing-field');
+                    endOfGame();
+                }
             }
            /* else if (analiseData(data)==='string'){
                запускаем только если будем присылать строку
@@ -380,13 +393,13 @@ function getServerHit(){
             //нам прислали ячейку
             //запускаем функцию проверки попал он или нет
             //(data.y, data.x)
-            if (CheckOurSellForHurting(0,0)==='hitby'){
+            if (CheckOurSellForHurting(data.x,data.y)==='hitby'){
                 console.log('Промах');
             }
-            else if(CheckOurSellForHurting(0,0)==='hurt'){
+            else if(CheckOurSellForHurting(data.x,data.y)==='hurt'){
                 console.log('Пользователя ранили');
             }
-            else if (CheckOurSellForHurting(0,0)==='kill'){
+            else if (CheckOurSellForHurting(data.x,data.y)==='kill'){
                 console.log('Корабль пользователя убит');
             }
         },
