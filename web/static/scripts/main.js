@@ -303,13 +303,16 @@ function clickOpponentCell(){
                 //мы убили корабль либо выйграли игру
                 if(data.state===1){
                     //убили корабль(у него должны все ячейки быть =3)
-                    //закрасить все ячейки корабля убитыми
+                    //закрасить все ячейки корабля убитыми +внутри метод который их обводит
                     drawkillShip(data,'opponent-playing-field');
                 }
                 else if(data.state===2){
                     //конец игры
+                    //закрасить все ячейки корабля убитыми +внутри метод который их обводит
                     drawkillShip(data,'opponent-playing-field');
                     endOfGame();
+                    document.getElementById('btn_yes').addEventListener("click", clickRepeat);
+                    document.getElementById('btn_no').addEventListener("click", clickNoRepeat);
                 }
             }
            /* else if (analiseData(data)==='string'){
@@ -317,21 +320,16 @@ function clickOpponentCell(){
             }*/
         },
         error:function () {
-            
         }
     });
-
-    /*hitBy('opponent-playing-field', i,j); //мимо
-    hurt('opponent-plaing-field', i, j ); // ранен
-    killed('opponent-playing-field', i, j)//убит
-    */
-
-    //и один из следующих методов для поля игрока
-    /*hitBy('my-playing-field', i,j); //мимо
-    hurt('my-plaing-field', i, j ); // ранен
-    killed('my-playing-field', i, j)//убит
-    */
 }
+function clickRepeat() {
+    location.href=location.href;
+}
+function clickNoRepeat() {
+    Goodbuy();
+}
+
 function setMyShipCellsStatus() {
     console.log('function setNullStatus to All Ships');
     for (let ship in myShips){

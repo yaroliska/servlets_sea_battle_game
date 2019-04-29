@@ -130,7 +130,7 @@ function drawkillShip(ship, className) {
             //убрать my-ship class если требуется
         }
     }
-    //метод окружения корабля ячейками мимо
+    markAround(ship,className);
 }
 
 function markAround(ship,className) {
@@ -162,6 +162,46 @@ function checkMarkCells(className,im,jm) {
 
 function changeH1(string) {
     document.getElementById('h1').innerText = string;
+}
+
+function endOfGame(){
+    let div = document.createElement('div');
+    div.classList.add('endOfgame');
+    div.classList.add('w3-center');
+
+    let h1 = document.createElement('h1');
+    h1.id = 'h1_end';
+    h1.className = "w3-center h1-end";
+    h1.innerText = 'Конец игры!';
+    let h12 = document.createElement('h1');
+    h12.id = 'h12_end';
+    h12.className = "w3-center h1-end";
+    h12.innerText = 'Вы хотите сыграть ещё?';
+    div.appendChild(h1);
+    div.appendChild(h12);
+    let container = document.createElement('div');
+    container.classList.add('buttons_div');
+    //добавляем невидимую кнопки
+    let btn1 = document.createElement('button');
+    btn1.className = "w3-center w3-btn btn__game-repeat";
+    btn1.innerText = "Да! =)";
+    btn1.id ='btn_yes';
+    let btn2 = document.createElement('button');
+    btn2.className = "w3-center w3-btn btn__game-repeat";
+    btn2.innerText = "Нет =(";
+    btn2.id ='btn_no';
+    container.appendChild(btn1);
+    container.appendChild(btn2);
+    div.appendChild(container);
+    let field_container = document.getElementsByClassName('wrapper');
+    field_container[0].appendChild(div);
+}
+
+function Goodbuy(){
+    document.getElementById('h1_end').remove();
+    document.getElementById('h12_end').innerText = 'Спасибо, что играли в нашу игру!';
+    document.getElementById('btn_yes').remove();
+    document.getElementById('btn_no').remove();
 }
 
 
